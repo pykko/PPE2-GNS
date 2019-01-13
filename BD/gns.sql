@@ -1,7 +1,7 @@
-drop database if exists xdq ;
+drop database if exists gns ;
 
-create database if not exists xdq default character set utf8 default collate utf8_general_ci ;
-use xdq ;
+create database if not exists gns default character set utf8 default collate utf8_general_ci ;
+use gns ;
 
 
 create table Joueur (
@@ -13,6 +13,14 @@ create table Joueur (
 	
 ) engine=InnoDB default charset=utf8 ;
 
+insert into Joueur( nom , mdp ) values ( 'nitharsan' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'tsashua' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'megane' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'vinoth' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'leonard' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'gautier' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'romain' , 'azerty' ) ;
+insert into Joueur( nom , mdp ) values ( 'nicolas' , 'azerty' ) ;
 
 
 create table Partie (
@@ -21,7 +29,7 @@ create table Partie (
 	initiateur int not null ,
 	adversaire int ,
 	vainqueur int ,
-	son_tour int ,
+	attendu int ,
 	primary key( id ) ,
 	foreign key( initiateur ) references Joueur( id ) ,
 	foreign key( adversaire ) references Joueur( id ) ,
@@ -30,10 +38,11 @@ create table Partie (
 	
 ) engine=InnoDB default charset=utf8 ; 
 
+
 create table Choisir (
 	id_partie int not null ,
 	id_joueur int not null ,
-	couleur varchar( 10 ) not null ,
+	couleur char( 1 ) not null ,
 	primary key( id_partie , id_joueur ) ,
 	foreign key( id_partie ) references Partie( id ) ,
 	foreign key( id_joueur ) references Joueur( id )
