@@ -11,7 +11,7 @@ app = Flask( __name__ )
 
 @app.route( '/' , methods = [ 'GET' ] )
 def accueillir() :
-    return make_response( 'XDQ' )
+    return make_response( 'GNS' )
 
 @app.route( '/joueurs/connexion/<pseudo>/<mdp>' , methods = [ 'GET' ] )
 def seConnecter( pseudo , mdp ) :
