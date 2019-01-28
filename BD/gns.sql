@@ -34,7 +34,7 @@ create table Partie (
 	foreign key( initiateur ) references Joueur( id ) ,
 	foreign key( adversaire ) references Joueur( id ) ,
 	foreign key( vainqueur ) references Joueur( id ) ,
-	foreign key( son_tour ) references Joueur( id )
+	foreign key( attendu) references Joueur( id )
 	
 ) engine=InnoDB default charset=utf8 ; 
 
