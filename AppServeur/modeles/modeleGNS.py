@@ -7,6 +7,10 @@ import mysql.connector
 
 connexion = None
 
+global pions
+pions = {}
+pions['blanc'] = [(3,1),(2,6),(3,5),(2,2),(3,3),(1,7),(1,1),(3,7)]
+pions['noir'] = [(7,7),(8,2),(7,3),(8,6),(7,5),(9,1),(9,7),(7,1)]
 
 def getConnexion() :
     global connexion
@@ -76,14 +80,13 @@ def initier( idJoueur , couleur ) :
                 values( %s , %s , %s )
             '''
         curseur.execute( requeteChoisir , ( idPartie , idJoueur , couleur ) )
-
+        
+        pion = initierPions(idPartie , couleur ,curseur)	
+        	
         connexion.commit()
-
         curseur.close()
-
         return idPartie
-
-
+        
     except mysql.connector.Error as e :
         print( e )
         return None
@@ -95,7 +98,7 @@ def rejoindre(idPartie , idJoueur , couleur):
 		if couleur == 'B':
 			requetePartie = '''
 				update Partie
-				set adversaire = %s , attendu = % s
+				set adversaire = %s , attendu = %s
 				where id = %s
 				'''
 			curseur.execute( requetePartie, ( idJoueur , idJoueur , idPartie))
@@ -106,11 +109,16 @@ def rejoindre(idPartie , idJoueur , couleur):
 				where id = %s
 				'''
 			curseur.execute( requetePartie, ( idJoueur , idPartie))
+		
+		
 		requeteChoisir = '''
 				insert into Choisir
 				values( %s , %s , %s )
 			'''
 		curseur.execute(requeteChoisir ,(idPartie , idJoueur , couleur ) )
+		
+		pion = initierPions(idPartie , couleur ,curseur)
+				
 		connexion.commit()
 		curseur.close()
 		return idPartie
@@ -118,6 +126,33 @@ def rejoindre(idPartie , idJoueur , couleur):
 	except mysql.connector.Error as e :
 		print( e )
 		return None
+
+
+
+def initierPions(idPartie, couleur ,curseur):
+	try:
+		 
+		animals = getAnimaux()
+		
+		for i in range(len(animals)):
+			requetePions = ''' 
+				insert into Pion 
+				values( %s , %s , %s , %s , %s ) 
+					'''
+			if couleur == 'B':
+				curseur.execute( requetePions , ( idPartie ,animals[i]['numero'] , 'B' ,pions['blanc'][i][0] , pions['blanc'][i][1]) )
+			else:
+				curseur.execute( requetePions , ( idPartie ,animals[i]['numero'] , 'N' ,pions['noir'][i][0] , pions['noir'][i][1]) )
+		
+		
+		return idPartie
+				
+	except mysql.connector.Error as e :
+				print( e )
+				return None
+
+
+
 
 def partieEnAttenteJoueur(idJoueur):
 	try:
@@ -446,5 +481,130 @@ def annuler(idPartie):
 		print(e)
 		return None
 	
-	
+def getAnimaux():
+	try:
+		curseur = getConnexion().cursor()
+		
+		requeteAnimal = '''
+			select numero , nom
+			from Animal
+			'''
+		
+		curseur.execute(requeteAnimal,())
+		
+		enregistrement = curseur.fetchall()
+		
+		animaux = []
+		
+		for unenregistrement in enregistrement:
+			animal = {}
+			animal['numero'] = unenregistrement[0]
+			animal['nom'] = unenregistrement[1]
+			animaux.append(animal)
+			
+		curseur.close()
+		return animaux
+		
+	except mysql.connector.Error as e :
+		print(e)
+		return None
+		
+
+def getPionsDansPartie(idPartie):
+	try :
+		curseur = getConnexion().cursor()
+		
+		requetePion = '''
+			select id_pion,nom,couleur,ligne,colonne
+			from Pion p
+			inner join Animal a
+			on p.id_pion = a.numero
+			where id_partie = %s
+			'''
+		
+		curseur.execute(requetePion ,(idPartie, ))
+		
+		
+		enregistrement = curseur.fetchall()
+		
+		pionPartie = []
+		
+		for unenregistrement in enregistrement:
+			pion = {}
+			pion['idpion'] = unenregistrement[0]
+			pion['nom'] = unenregistrement[1]
+			pion['couleur'] = unenregistrement[2]
+			pion['ligne'] = unenregistrement[3]
+			pion['colonne'] = unenregistrement[4]
+			
+			pionPartie.append(pion)
+			
+		curseur.close()
+		return pionPartie
+		
+	except mysql.connector.Error as e :
+		print(e)
+		return None
+			
+			
+def deplacerPion(idPartie,numAnimal,couleurAnimal,ligne,colonne):
+	try :
+		curseur = getConnexion().cursor()
+		
+		requeteDeplacement = '''
+			update Pion
+			set ligne = %s , colonne = %s
+			where id_partie = %s
+			and id_pion = %s
+			and couleur = %s
+			'''
+			
+		curseur.execute(requeteDeplacement,(ligne,colonne,idPartie,numAnimal,couleurAnimal))
+		
+		connexion.commit()
+		curseur.close()
+		return idPartie
+		
+	except mysql.connector.Error as e :
+		print(e)
+		return None
+		
+		
+def deplacerPionAvecSuppression(idPartie,numAnimal,couleurAnimal,ligne,colonne,adNumAnimal,adCouleurAnimal):
+	try :
+		curseur = getConnexion().cursor()
+		
+		requeteSuppression = '''
+			delete 
+			from Pion
+			where id_pion = %s
+			and id_partie = %s
+			and couleur = %s
+			'''
+		
+		curseur.execute( requeteSuppression ,(adNumAnimal,idPartie,adCouleurAnimal))
+		
+		requeteDeplacement = '''
+			update Pion
+			set ligne = %s , colonne = %s
+			where id_partie = %s
+			and id_pion = %s
+			and couleur = %s
+			'''
+			
+		curseur.execute(requeteDeplacement,(ligne,colonne,idPartie,numAnimal,couleurAnimal))
+		
+		connexion.commit()
+		curseur.close()
+		return idPartie
+		
+	except mysql.connector.Error as e :
+		print(e)
+		return None
+		
+
+		
+		
+			
+		
 	

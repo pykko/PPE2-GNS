@@ -221,7 +221,70 @@ def annuler(idPartie):
 	else :
 		reponse.status_code = 406
 	
-	return reponse	 
+	return reponse	
+	
+	
+@app.route( '/animaux/' , methods = [ 'GET' ] )
+def getanimaux():
+	animaux = modeleGNS.animaux()
+	
+	if animaux !=  None and len( animaux ) != 0 :
+		reponse = make_response( json.dumps( animaux) )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 200
+	else :
+		reponse = make_response( '' )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 404
+
+	return reponse
+	
+
+@app.route( '/partie/<idPartie>/pions' , methods = [ 'GET' ] )
+def pionsDansPartie(idPartie):
+	pionsDansPartie = modeleGNS.getPionsDansPartie(idPartie)
+	
+	if pionsDansPartie !=  None and len( pionsDansPartie ) != 0 :
+		reponse = make_response( json.dumps( pionsDansPartie) )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 200
+	else :
+		reponse = make_response( '' )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 404
+
+	return reponse
+	
+
+@app.route( '/joueurs/<idJoueur>/parties/<idPartie>/jouer/<numAnimal>/<couleurAnimal>/<ligne>/<colonne>' , methods = [ 'PUT' ] )
+def deplacement(idJoueur,idPartie,numAnimal,couleurAnimal,ligne,colonne):
+	deplacer = modeleGNS.deplacerPion(idPartie,numAnimal,couleurAnimal,ligne,colonne)
+	
+	if deplacer !=  None and len( deplacer ) != 0 :
+		reponse = make_response( json.dumps( 'Deplacement avec succes') )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 200
+	else :
+		reponse = make_response( '' )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 404
+
+	return reponse
+	
+@app.route( '/joueurs/<idJoueur>/parties/<idPartie>/jouer/<numAnimal>/<couleurAnimal>/<ligne>/<colonne>/<adNumAnimal>/<adCouleurAnimal>' , methods = [ 'PUT' ] )
+def deplacementAvecSuppression(idJoueur,idPartie,numAnimal,couleurAnimal,ligne,colonne,adNumAnimal,adCouleurAnimal):
+	deplacerAvecSuppression = modeleGNS.deplacerPionAvecSuppression(idPartie,numAnimal,couleurAnimal,ligne,colonne,adNumAnimal,adCouleurAnimal)
+	
+	if deplacerAvecSuppression !=  None and len( deplacerAvecSuppression ) != 0 :
+		reponse = make_response( json.dumps( 'Deplacement avec succes') )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 200
+	else :
+		reponse = make_response( '' )
+		reponse.mimeType = 'application/json'
+		reponse.status_code = 404
+
+	return reponse
 	
 
 
